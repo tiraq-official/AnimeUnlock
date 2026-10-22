@@ -1,0 +1,14 @@
+[SddmGreeterTheme]
+Name=AnimeUnlock
+Description=A frosted-glass SDDM theme with a profile selector on the left, a session selector on the right, and a blurred password bar that appears as you type.
+Author=Saptak Maji
+Copyright=Copyright (C) 2026 Saptak Maji
+License=GPL-3.0-or-later
+Type=sddm-theme
+Version=1.0
+Website=
+Screenshot=Previews/idle.jpg
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=animeunlock
+Theme-API=2.11
