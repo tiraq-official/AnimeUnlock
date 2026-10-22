@@ -72,6 +72,7 @@ Everything lives in `theme.conf` next to `Main.qml`:
 | `FontFamily` / `MonoFontFamily` | UI font and the monospace prompt/date font |
 | `PromptText` | The idle pill text |
 | `WeatherText` / `ShowWeather` | The top-right pill (SDDM has no network, so it is a static label) |
+| `AlwaysShowPowerButtons` | `true` (default) always shows the suspend / restart / power buttons; `false` hides whichever ones SDDM reports it cannot do |
 | `DimBackground` | 0–1 darkening of the idle screen |
 | `BlurDuration` | Cross-fade time in ms |
 | `ScreenWidth` / `ScreenHeight` | Leave 0 to auto-detect |

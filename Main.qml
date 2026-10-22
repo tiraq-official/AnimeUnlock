@@ -41,8 +41,8 @@ Rectangle {
     // ------------------------------------------------------------ palette ---
     property color cText:        "#ffffff"
     property color cTextDim:     "#d9e6f5"
-    property color cGlass:       Qt.rgba(0.055, 0.098, 0.176, 0.55)
-    property color cGlassStrong: Qt.rgba(0.035, 0.070, 0.135, 0.74)
+    property color cGlass:       Qt.rgba(0.031, 0.059, 0.118, 0.72)
+    property color cGlassStrong: Qt.rgba(0.020, 0.043, 0.086, 0.86)
     property color cStroke:      Qt.rgba(1, 1, 1, 0.14)
     property color cAccent:      "#a7d4ff"
     property color cDanger:      "#ffb4b4"
@@ -71,9 +71,16 @@ Rectangle {
     // ------------------------------------------------- SDDM capabilities ---
     // Read once here; component files then use root.canSuspend / etc. rather
     // than touching the sddm context property during their first evaluation.
-    readonly property bool canSuspend:  (typeof sddm !== "undefined" && sddm !== null) ? sddm.canSuspend  : true
-    readonly property bool canReboot:   (typeof sddm !== "undefined" && sddm !== null) ? sddm.canReboot   : true
-    readonly property bool canPowerOff: (typeof sddm !== "undefined" && sddm !== null) ? sddm.canPowerOff : true
+    //
+    // Note: in `sddm-greeter --test-mode` there is no SDDM daemon behind the
+    // greeter, so it reports every power capability as false and the buttons
+    // would vanish. AlwaysShowPowerButtons therefore defaults to true, which
+    // matches the reference design (all three buttons, always). Set it to
+    // "false" in theme.conf to hide whatever SDDM says it cannot do.
+    readonly property bool alwaysPower: config.AlwaysShowPowerButtons !== "false"
+    readonly property bool canSuspend:  root.alwaysPower || ((typeof sddm !== "undefined" && sddm !== null) ? sddm.canSuspend  : true)
+    readonly property bool canReboot:   root.alwaysPower || ((typeof sddm !== "undefined" && sddm !== null) ? sddm.canReboot   : true)
+    readonly property bool canPowerOff: root.alwaysPower || ((typeof sddm !== "undefined" && sddm !== null) ? sddm.canPowerOff : true)
 
     // -------------------------------------------------------------- state ---
     property bool   entryMode: false
@@ -165,7 +172,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: root.shakeOffset
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: root.s(58)
+        anchors.bottomMargin: root.s(40)
         width:  childrenRect.width
         height: Math.max(profile.height, centreSlot.height, session.height)
 
@@ -223,7 +230,7 @@ Rectangle {
         u: root.uiScale
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: root.s(56)
+        anchors.margins: root.s(40)
         opacity: root.entryMode ? 0 : 1
         visible: opacity > 0.01
         Behavior on opacity { NumberAnimation { duration: 200 } }
