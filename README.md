@@ -10,7 +10,7 @@
 
 | Idle | Unlocking |
 | :-: | :-: |
-| ![Idle](Previews/idle.jpg) | ![Unlocking](Previews/entry.jpg) |
+| ![Idle](Previews/idle.png) | ![Unlocking](Previews/entry.png) |
 
 ## Highlights
 
