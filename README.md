@@ -73,6 +73,7 @@ Everything lives in `theme.conf` next to `Main.qml`:
 | `PromptText` | The idle pill text |
 | `WeatherText` / `ShowWeather` | The top-right pill (SDDM has no network, so it is a static label) |
 | `AlwaysShowPowerButtons` | `true` (default) always shows the suspend / restart / power buttons; `false` hides whichever ones SDDM reports it cannot do |
+| `PillFrost` / `PillBlurRadius` | Frosted-glass pills: `true` (default) blurs the wallpaper behind each pill, radius 40px |
 | `DimBackground` | 0–1 darkening of the idle screen |
 | `BlurDuration` | Cross-fade time in ms |
 | `ScreenWidth` / `ScreenHeight` | Leave 0 to auto-detect |
@@ -87,6 +88,16 @@ Everything lives in `theme.conf` next to `Main.qml`:
    ```
 
 `make_blur.py` just needs Pillow.
+
+## Frosted glass
+
+The pills blur whatever wallpaper sits behind them. That needs a blur effect,
+and its module name changed between Qt versions — `QtGraphicalEffects` on
+Qt 5, `Qt5Compat.GraphicalEffects` on Qt 6 — so the theme ships both and uses
+whichever the greeter can load (you will see a one-line "module not installed"
+note for the one that fails, which is harmless). If neither is available the
+pills fall back to their plain translucent fill; set `PillFrost="false"` if
+you would rather skip it.
 
 ## Notes
 

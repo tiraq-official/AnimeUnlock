@@ -41,8 +41,8 @@ Rectangle {
     // ------------------------------------------------------------ palette ---
     property color cText:        "#ffffff"
     property color cTextDim:     "#d9e6f5"
-    property color cGlass:       Qt.rgba(0.031, 0.059, 0.118, 0.72)
-    property color cGlassStrong: Qt.rgba(0.020, 0.043, 0.086, 0.86)
+    property color cGlass:       Qt.rgba(0.027, 0.053, 0.106, 0.78)
+    property color cGlassStrong: Qt.rgba(0.018, 0.039, 0.078, 0.90)
     property color cStroke:      Qt.rgba(1, 1, 1, 0.14)
     property color cAccent:      "#a7d4ff"
     property color cDanger:      "#ffb4b4"
@@ -88,6 +88,63 @@ Rectangle {
     property string errorText: ""
     property real   shakeOffset: 0
 
+    // -------------------------------------------------------- frosted glass ---
+    // Each pill blurs the wallpaper sitting behind it. That needs a blur
+    // effect, and the module name differs between Qt 5 (QtGraphicalEffects)
+    // and Qt 6 (Qt5Compat.GraphicalEffects), so both are shipped and whichever
+    // one the greeter can load is the one used. If neither loads, the pills
+    // simply stay solid.
+    property string frostQml: ""
+    readonly property bool pillFrost: config.PillFrost !== "false"
+    readonly property real pillBlur: config.PillBlurRadius ? parseFloat(config.PillBlurRadius) : 40
+
+    function rectInBg(item) {
+        if (!item || !bgLayer) return Qt.rect(0, 0, 0, 0);
+        var p = item.mapToItem(bgLayer, 0, 0);
+        return Qt.rect(p.x, p.y, item.width, item.height);
+    }
+
+    // mapToItem() does not create binding dependencies, so each rect also
+    // touches the properties that can shift the widgets around.
+    readonly property rect profileFrostRect: {
+        var _d = bottomRow.x + bottomRow.y + profile.x + profile.y + profile.width + profile.height;
+        return rectInBg(profile);
+    }
+    readonly property rect centreFrostRect: {
+        var t = root.entryMode ? passwordBar : unlockPill;
+        var _d = bottomRow.x + bottomRow.y + centreSlot.x + centreSlot.y + t.x + t.y + t.width + t.height;
+        return rectInBg(t);
+    }
+    readonly property rect sessionFrostRect: {
+        var _d = bottomRow.x + bottomRow.y + session.x + session.y + session.width + session.height;
+        return rectInBg(session);
+    }
+    readonly property rect powerFrostRect: {
+        var _d = cornerPower.x + cornerPower.y + cornerPower.width + cornerPower.height;
+        return rectInBg(cornerPower);
+    }
+    readonly property rect weatherFrostRect: {
+        var _d = weather.x + weather.y + weather.width + weather.height;
+        return rectInBg(weather);
+    }
+
+    Loader {
+        id: frostProbe6
+        width: 0; height: 0
+        source: "components/Frost6.qml"
+        onStatusChanged: {
+            if (status === Loader.Ready) root.frostQml = "Frost6.qml";
+            else if (status === Loader.Error) frostProbe5.active = true;
+        }
+    }
+    Loader {
+        id: frostProbe5
+        width: 0; height: 0
+        active: false
+        source: "components/Frost5.qml"
+        onStatusChanged: if (status === Loader.Ready) root.frostQml = "Frost5.qml";
+    }
+
     // -------------------------------------------------------------- logic ---
     function enterEntry() {
         if (root.busy) return;
@@ -109,29 +166,35 @@ Rectangle {
     }
 
     // --------------------------------------------------------- background ---
-    Image {
-        id: bgSharp
+    // bgLayer is what the pills sample from to build their frosted backdrop.
+    Item {
+        id: bgLayer
         anchors.fill: parent
-        source: root.bgImage
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        cache: true
-    }
-    Image {
-        id: bgBlur
-        anchors.fill: parent
-        source: root.bgBlurImage
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        cache: true
-        opacity: root.entryMode ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: root.blurDuration; easing.type: Easing.InOutQuad } }
-    }
-    Rectangle {
-        anchors.fill: parent
-        color: "#04101f"
-        opacity: root.entryMode ? Math.min(0.55, root.dimAmount + 0.20) : root.dimAmount
-        Behavior on opacity { NumberAnimation { duration: root.blurDuration; easing.type: Easing.InOutQuad } }
+
+        Image {
+            id: bgSharp
+            anchors.fill: parent
+            source: root.bgImage
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            cache: true
+        }
+        Image {
+            id: bgBlur
+            anchors.fill: parent
+            source: root.bgBlurImage
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            cache: true
+            opacity: root.entryMode ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: root.blurDuration; easing.type: Easing.InOutQuad } }
+        }
+        Rectangle {
+            anchors.fill: parent
+            color: "#04101f"
+            opacity: root.entryMode ? Math.min(0.55, root.dimAmount + 0.20) : root.dimAmount
+            Behavior on opacity { NumberAnimation { duration: root.blurDuration; easing.type: Easing.InOutQuad } }
+        }
     }
 
     // Clicks on empty space: unlock in idle mode, re-focus (or lock) in entry mode.
@@ -160,6 +223,7 @@ Rectangle {
     WeatherPill {
         id: weather
         u: root.uiScale
+        frostRect: root.weatherFrostRect
         visible: root.showWeather && root.weatherText !== ""
         anchors.right: parent.right
         anchors.top: parent.top
@@ -172,13 +236,14 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: root.shakeOffset
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: root.s(40)
+        anchors.bottomMargin: root.s(30)
         width:  childrenRect.width
         height: Math.max(profile.height, centreSlot.height, session.height)
 
         ProfileSelector {
             id: profile
             u: root.uiScale
+            frostRect: root.profileFrostRect
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -196,6 +261,7 @@ Rectangle {
             UnlockPill {
                 id: unlockPill
                 u: root.uiScale
+                frostRect: root.centreFrostRect
                 anchors.centerIn: parent
                 opacity: root.entryMode ? 0 : 1
                 visible: opacity > 0.01
@@ -205,6 +271,7 @@ Rectangle {
             PasswordBar {
                 id: passwordBar
                 u: root.uiScale
+                frostRect: root.centreFrostRect
                 anchors.centerIn: parent
                 opacity: root.entryMode ? 1 : 0
                 visible: opacity > 0.01
@@ -218,6 +285,7 @@ Rectangle {
         SessionSelector {
             id: session
             u: root.uiScale
+            frostRect: root.sessionFrostRect
             anchors.left: centreSlot.right
             anchors.leftMargin: root.s(18)
             anchors.verticalCenter: parent.verticalCenter
@@ -230,7 +298,8 @@ Rectangle {
         u: root.uiScale
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: root.s(40)
+        anchors.margins: root.s(30)
+        frostBase: root.powerFrostRect
         opacity: root.entryMode ? 0 : 1
         visible: opacity > 0.01
         Behavior on opacity { NumberAnimation { duration: 200 } }

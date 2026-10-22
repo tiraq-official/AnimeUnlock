@@ -8,11 +8,20 @@ import QtQuick 2.11
 Item {
     id: pill
     property real u: 1
+    property rect frostRect: Qt.rect(0, 0, 0, 0)
 
     implicitWidth: row.implicitWidth + root.s(30)
     implicitHeight: root.s(42)
     width: implicitWidth
     height: implicitHeight
+
+    FrostedBackdrop {
+        anchors.fill: parent
+        sourceItem: bgLayer
+        sourceRect: pill.frostRect
+        cornerRadius: pill.height / 2
+        blurRadius: root.pillBlur
+    }
 
     Rectangle {
         anchors.fill: parent

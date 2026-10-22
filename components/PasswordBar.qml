@@ -12,6 +12,7 @@ Item {
     property string userName:    ""
     property string userDisplay: ""
     property string userIcon:    ""
+    property rect   frostRect:   Qt.rect(0, 0, 0, 0)
 
     property alias password: field.text
     signal submitted()
@@ -33,6 +34,14 @@ Item {
     function focusPassword() { field.forceActiveFocus() }
     function clearPassword() { field.text = "" }
     function appendText(t)   { field.text += t; field.cursorPosition = field.text.length }
+
+    FrostedBackdrop {
+        anchors.fill: parent
+        sourceItem: bgLayer
+        sourceRect: bar.frostRect
+        cornerRadius: root.s(27)
+        blurRadius: root.pillBlur
+    }
 
     Rectangle {
         anchors.fill: parent

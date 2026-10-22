@@ -8,6 +8,7 @@ Item {
     id: cluster
     property real u: 1
     property real d: root.s(48)
+    property rect frostBase: Qt.rect(0, 0, 0, 0)
 
     implicitWidth:  row.implicitWidth
     implicitHeight: d
@@ -28,9 +29,20 @@ Item {
             ]
 
             delegate: Item {
+                id: circle
                 width: cluster.d
                 height: cluster.d
                 visible: modelData.ok
+
+                FrostedBackdrop {
+                    anchors.fill: parent
+                    sourceItem: bgLayer
+                    sourceRect: Qt.rect(cluster.frostBase.x + row.x + circle.x,
+                                        cluster.frostBase.y + row.y + circle.y,
+                                        circle.width, circle.height)
+                    cornerRadius: width / 2
+                    blurRadius: root.pillBlur
+                }
 
                 Rectangle {
                     anchors.fill: parent

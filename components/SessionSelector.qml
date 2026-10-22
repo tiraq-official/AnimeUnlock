@@ -16,6 +16,7 @@ Item {
         return (li !== undefined && li >= 0) ? li : 0;
     }
     property string selName: ""
+    property rect   frostRect: Qt.rect(0, 0, 0, 0)
 
     implicitWidth:  row.implicitWidth + root.s(34)
     implicitHeight: root.s(52)
@@ -37,6 +38,14 @@ Item {
         if (it) session.selName = it.n;
     }
     Component.onCompleted: Qt.callLater(session.sync)
+
+    FrostedBackdrop {
+        anchors.fill: parent
+        sourceItem: bgLayer
+        sourceRect: session.frostRect
+        cornerRadius: session.height / 2
+        blurRadius: root.pillBlur
+    }
 
     Rectangle {
         anchors.fill: parent

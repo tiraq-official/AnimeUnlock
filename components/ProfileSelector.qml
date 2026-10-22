@@ -17,6 +17,7 @@ Item {
     property string userName:    ""
     property string userDisplay: ""
     property string userIcon:    ""
+    property rect   frostRect:   Qt.rect(0, 0, 0, 0)
 
     implicitWidth:  row.implicitWidth + root.s(34)
     implicitHeight: root.s(52)
@@ -46,6 +47,14 @@ Item {
         }
     }
     Component.onCompleted: Qt.callLater(profile.sync)
+
+    FrostedBackdrop {
+        anchors.fill: parent
+        sourceItem: bgLayer
+        sourceRect: profile.frostRect
+        cornerRadius: profile.height / 2
+        blurRadius: root.pillBlur
+    }
 
     Rectangle {
         anchors.fill: parent

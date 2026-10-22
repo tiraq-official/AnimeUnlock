@@ -50,18 +50,25 @@ Item {
             ctx.stroke();
 
         } else if (n === "restart") {
-            var a0 = -Math.PI * 0.30;
-            var a1 = Math.PI * 1.02;
+            // an open ring ...
+            var a0 = Math.PI * 0.30;
+            var a1 = Math.PI * 1.80;
             ctx.beginPath();
             ctx.arc(cx, cy, r, a0, a1);
             ctx.stroke();
-            var ex = cx + r * Math.cos(a1);
-            var ey = cy + r * Math.sin(a1);
-            var t  = r * 0.62;
+
+            // ... with a solid arrow head on its end, pointing the way the
+            // arrow travels (clockwise)
+            var ex  = cx + r * Math.cos(a1);
+            var ey  = cy + r * Math.sin(a1);
+            var dir = a1 + Math.PI / 2;
+            var ux = Math.cos(dir), uy = Math.sin(dir);
+            var nx = -uy, ny = ux;
+            var hl = r * 0.80, hw = r * 0.62;
             ctx.beginPath();
-            ctx.moveTo(ex - t * 0.75, ey - t * 0.40);
-            ctx.lineTo(ex + t * 0.50, ey - t * 0.05);
-            ctx.lineTo(ex - t * 0.05, ey + t * 0.75);
+            ctx.moveTo(ex + ux * hl * 0.85, ey + uy * hl * 0.85);
+            ctx.lineTo(ex - ux * hl * 0.45 + nx * hw, ey - uy * hl * 0.45 + ny * hw);
+            ctx.lineTo(ex - ux * hl * 0.45 - nx * hw, ey - uy * hl * 0.45 - ny * hw);
             ctx.closePath();
             ctx.fill();
 
